@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Descubra sua Classe Social</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark-mode-scroll::-webkit-scrollbar-thumb { background: #334155; }
+        
+        .option-card { transition: all 0.2s ease-in-out; }
+        .option-selected {
+            border-color: #3b82f6 !important;
+            background-color: rgba(59, 130, 246, 0.2) !important;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modal animations */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.3s ease-out; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: all 0.2s ease-in; }
+    </style>
+</head>
+<body id="main-body" class="bg-slate-900 text-slate-200 min-h-screen flex items-center justify-center p-4 dark-mode-scroll transition-colors duration-500">
+
+    <div id="app-container" class="w-full max-w-4xl bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-700 relative overflow-hidden transition-colors duration-500">
+        
+        <div id="bg-decoration" class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10 transition-opacity duration-500">
+            <div class="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-gradient-to-br from-blue-900/20 to-purple-900/20 blur-3xl rounded-full"></div>
+        </div>
+
+        <!-- ================= START SCREEN ================= -->
+        <div id="screen-start" class="flex flex-col items-center text-center space-y-6">
+            <div class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/50 mb-4">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight">Descubra sua Classe Social</h1>
+            <p class="text-slate-400 max-w-xl text-lg">Baseado nos critérios oficiais de pesquisa do Brasil (ABEP). Responda 20 perguntas para descobrir em qual estrato econômico você se encaixa.</p>
+            
+            <div class="w-full max-w-md mt-8 space-y-4">
+                <div class="text-left">
+                    <label for="playerName" class="block text-sm font-medium text-slate-400 mb-2">Qual o seu nome para o registro final?</label>
+                    <input type="text" id="playerName" placeholder="Digite seu nome..." class="w-full bg-slate-900 border border-slate-600 rounded-xl px-5 py-4 text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-inner">
+                    <p id="nameError" class="text-red-400 text-sm mt-2 hidden flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Por favor, insira seu nome para iniciar o quiz.
+                    </p>
+                </div>
+                <button onclick="startQuiz()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg py-4 px-6 rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-500/40 transition-all duration-300 flex justify-center items-center gap-3 transform hover:-translate-y-1">
+                    Iniciar Avaliação
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= QUIZ SCREEN ================= -->
+        <div id="screen-quiz" class="hidden flex-col space-y-6">
+            
+            <!-- Header and Progress -->
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <span id="questionCounter" class="text-sm font-bold text-blue-400 uppercase tracking-wider block">Questão 1 de 20</span>
+                </div>
+                <span class="text-sm font-medium text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-700" id="playerNameDisplay">Jogador</span>
+            </div>
+            
+            <div class="w-full bg-slate-900 h-3 rounded-full overflow-hidden shadow-inner">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-600 to-indigo-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 5%"></div>
+            </div>
+
+            <!-- Question -->
+            <div class="mt-8 mb-4 min-h-[80px] flex items-center">
+                <h2 id="questionText" class="text-2xl md:text-3xl font-bold text-white leading-tight">Carregando pergunta...</h2>
+            </div>
+
+            <!-- Options -->
+            <div id="optionsContainer" class="space-y-3 flex-grow">
+                <!-- JS will inject options here -->
+            </div>
+
+            <!-- Controls -->
+            <div class="pt-8 border-t border-slate-700 flex justify-between items-center mt-6">
+                <button id="btnPrev" onclick="prevQuestion()" class="px-6 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Voltar
+                </button>
+                
+                <button id="btnNext" onclick="nextQuestion()" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 hover:shadow-lg hover:shadow-blue-600/30">
+                    Próxima
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                
+                <button id="btnFinish" onclick="finishQuiz()" class="hidden px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-white font-bold transition-all duration-200 flex items-center gap-2 shadow-lg shadow-emerald-500/30">
+                    Ver Resultado Final
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </button>
+            </div>
+            <p id="selectionWarning" class="text-amber-400 text-sm text-center hidden font-medium">⚠️ Por favor, selecione uma opção antes de avançar.</p>
+        </div>
+
+        <!-- ================= RESULT SCREEN (LIGHT THEME) ================= -->
+        <div id="screen-result" class="hidden flex-col items-center space-y-8 animate-fade-in text-gray-800">
+            
+            <!-- Header -->
+            <div class="text-center space-y-3 w-full">
+                <div class="inline-flex items-center justify-center p-3 bg-green-100 text-green-600 rounded-full mb-2">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-4xl font-extrabold text-gray-900 tracking-tight">Análise Concluída</h2>
+                <p class="text-gray-600 text-lg">Aqui está o seu perfil socioeconômico, <span id="resultName" class="font-bold text-gray-900"></span>.</p>
+            </div>
+
+            <!-- Score and Class Highlight -->
+            <div class="w-full grid grid-cols-1 md:grid-cols-5 gap-6">
+                <!-- Score (Span 2) -->
+                <div class="md:col-span-2 bg-white border border-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-sm">
+                    <p class="text-gray-500 font-semibold mb-2 uppercase tracking-wide text-sm">Pontuação Total</p>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-6xl font-black text-gray-900 tracking-tighter" id="resultScore">0</span>
+                        <span class="text-lg font-medium text-gray-400">/ 125</span>
+                    </div>
+                </div>
+                
+                <!-- Class (Span 3) -->
+                <div id="resultClassCard" class="md:col-span-3 rounded-2xl p-6 flex flex-col justify-center shadow-md text-white transition-all duration-700 transform scale-100 relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="font-semibold mb-1 opacity-90 uppercase tracking-wide text-sm">Você pertence à</p>
+                        <div class="text-5xl font-black mb-2" id="resultClass">Classe X</div>
+                        <p class="text-lg opacity-95 font-medium" id="resultDesc">Descrição</p>
+                    </div>
+                    <!-- Decorative background icon -->
+                    <svg class="absolute right-[-10%] bottom-[-20%] w-48 h-48 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5z"/></svg>
+                </div>
+            </div>
+
+            <!-- Colored Scale Infographic -->
+            <div class="w-full bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Escala de Classes Sociais no Brasil</h3>
+                    <button onclick="openModal()" class="text-sm font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Ver Detalhes e População
+                    </button>
+                </div>
+                
+                <div class="space-y-3" id="infographicContainer">
+                    <!-- JS will inject colorful bars here -->
+                </div>
+            </div>
+
+            <button onclick="resetApp()" class="px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-bold hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 w-full md:w-auto">
+                Refazer o Quiz
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: CLASS DETAILS ================= -->
+    <div id="detailsModal" class="fixed inset-0 z-50 flex items-center justify-center px-4 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div id="modalContent" class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative z-10 modal-enter border border-gray-200">
+            
+            <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-gray-100 p-6 flex justify-between items-center rounded-t-2xl z-20">
+                <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    Detalhes Demográficos
+                </h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-gray-600 mb-6">As estatísticas abaixo são aproximações baseadas em dados demográficos nacionais (IBGE/ABEP) para ilustrar a distribuição da população brasileira.</p>
+                
+                <div id="modalClassesList" class="space-y-4">
+                    <!-- JS will inject class details here -->
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl text-center">
+                <button onclick="closeModal()" class="px-6 py-2 bg-gray-800 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure for Questions and Points
+        const questionsData = [
+            { question: "Quantos banheiros há na sua residência?", options: [{ text: "Nenhum ou um compartilhado fora", points: 0 }, { text: "Um", points: 3 }, { text: "Dois", points: 7 }, { text: "Três", points: 10 }, { text: "Quatro ou mais", points: 14 }] },
+            { question: "Quantos automóveis de passeio exclusivos da sua casa vocês possuem?", options: [{ text: "Nenhum", points: 0 }, { text: "Um", points: 3 }, { text: "Dois", points: 5 }, { text: "Três", points: 8 }, { text: "Quatro ou mais", points: 11 }] },
+            { question: "Quantos microcomputadores ou notebooks há na residência?", options: [{ text: "Nenhum", points: 0 }, { text: "Um", points: 3 }, { text: "Dois", points: 6 }, { text: "Três", points: 8 }, { text: "Quatro ou mais", points: 11 }] },
+            { question: "Quantas geladeiras possuem em funcionamento?", options: [{ text: "Nenhuma", points: 0 }, { text: "Uma", points: 2 }, { text: "Duas", points: 3 }, { text: "Três ou mais", points: 5 }] },
+            { question: "Possui freezer independente (separado da geladeira)?", options: [{ text: "Não possuo", points: 0 }, { text: "Sim, um", points: 2 }, { text: "Sim, dois ou mais", points: 4 }] },
+            { question: "Possui máquina de lavar roupas?", options: [{ text: "Não possuo", points: 0 }, { text: "Sim, uma", points: 2 }, { text: "Sim, duas ou mais", points: 4 }] },
+            { question: "Possui máquina de lavar louças?", options: [{ text: "Não possuo", points: 0 }, { text: "Sim, uma", points: 3 }, { text: "Sim, duas ou mais", points: 6 }] },
+            { question: "Possui forno de micro-ondas?", options: [{ text: "Não possuo", points: 0 }, { text: "Sim, um", points: 2 }, { text: "Sim, dois ou mais", points: 4 }] },
+            { question: "Quantas motocicletas há na residência?", options: [{ text: "Nenhuma", points: 0 }, { text: "Uma", points: 1 }, { text: "Duas ou mais", points: 3 }] },
+            { question: "Possui máquina secadora de roupas (independente)?", options: [{ text: "Não possuo", points: 0 }, { text: "Sim, uma", points: 2 }, { text: "Sim, duas ou mais", points: 5 }] },
+            { question: "Quantas TVs / Smart TVs existem na casa?", options: [{ text: "Nenhuma", points: 0 }, { text: "Uma", points: 1 }, { text: "Duas", points: 3 }, { text: "Três", points: 5 }, { text: "Quatro ou mais", points: 7 }] },
+            { question: "Quantos aparelhos de ar-condicionado possuem?", options: [{ text: "Nenhum", points: 0 }, { text: "Um", points: 2 }, { text: "Dois", points: 5 }, { text: "Três ou mais", points: 8 }] },
+            { question: "Possui aspirador de pó?", options: [{ text: "Não", points: 0 }, { text: "Sim, um", points: 1 }, { text: "Sim, dois ou mais", points: 3 }] },
+            { question: "Quantos empregados mensalistas a residência possui?", options: [{ text: "Nenhum", points: 0 }, { text: "Um", points: 3 }, { text: "Dois", points: 7 }, { text: "Três ou mais", points: 10 }] },
+            { question: "A residência possui acesso à água encanada da rede pública?", options: [{ text: "Não", points: 0 }, { text: "Sim", points: 4 }] },
+            { question: "A rua onde mora é pavimentada (asfalto, paralelepípedo)?", options: [{ text: "Não (terra)", points: 0 }, { text: "Sim", points: 4 }] },
+            { question: "Qual o grau de instrução do chefe da família?", options: [{ text: "Analfabeto / Fund. I Incompleto", points: 0 }, { text: "Fundamental I Completo / Fund. II Incompleto", points: 1 }, { text: "Fundamental II Completo / Médio Incompleto", points: 2 }, { text: "Ensino Médio Completo / Superior Incompleto", points: 4 }, { text: "Ensino Superior Completo ou Pós-graduação", points: 8 }] },
+            { question: "Possui acesso à internet banda larga residencial?", options: [{ text: "Não possuo internet fixa em casa", points: 0 }, { text: "Sim, possuo", points: 3 }] },
+            { question: "Quantos serviços de streaming pagos assina?", options: [{ text: "Nenhum", points: 0 }, { text: "Um", points: 1 }, { text: "Dois ou três", points: 3 }, { text: "Quatro ou mais", points: 5 }] },
+            { question: "Possui plano de saúde privado pago pela família?", options: [{ text: "Não possuo (apenas SUS)", points: 0 }, { text: "Plano básico / Enfermaria", points: 3 }, { text: "Plano completo / Quarto padrão", points: 6 }] }
+        ];
+
+        const socialClasses = [
+            { id: 'A', name: 'Classe A', min: 100, max: 125, pop: '~3%', desc: 'Alta renda, executivos e grandes empresários.', bgClass: 'bg-green-500', textClass: 'text-green-700', borderClass: 'border-green-500', cardBg: 'bg-gradient-to-br from-green-500 to-emerald-700', icon: '💰' },
+            { id: 'B1', name: 'Classe B1', min: 85, max: 99, pop: '~5%', desc: 'Alto/Médio-alto poder aquisitivo. Profissionais bem-sucedidos.', bgClass: 'bg-teal-500', textClass: 'text-teal-700', borderClass: 'border-teal-500', cardBg: 'bg-gradient-to-br from-teal-500 to-cyan-700', icon: '💼' },
+            { id: 'B2', name: 'Classe B2', min: 70, max: 84, pop: '~15%', desc: 'Classe média estabelecida. Estabilidade financeira.', bgClass: 'bg-lime-500', textClass: 'text-lime-700', borderClass: 'border-lime-500', cardBg: 'bg-gradient-to-br from-lime-500 to-green-600', icon: '🏡' },
+            { id: 'C1', name: 'Classe C1', min: 55, max: 69, pop: '~22%', desc: 'Classe média tradicional.', bgClass: 'bg-yellow-400', textClass: 'text-yellow-700', borderClass: 'border-yellow-400', cardBg: 'bg-gradient-to-br from-yellow-400 to-amber-600', icon: '🛒' },
+            { id: 'C2', name: 'Classe C2', min: 40, max: 54, pop: '~25%', desc: 'Classe trabalhadora, média emergente.', bgClass: 'bg-orange-400', textClass: 'text-orange-700', borderClass: 'border-orange-400', cardBg: 'bg-gradient-to-br from-orange-400 to-orange-600', icon: '🛠️' },
+            { id: 'D', name: 'Classe D', min: 20, max: 39, pop: '~15%', desc: 'Baixo poder aquisitivo. Trabalhadores informais.', bgClass: 'bg-red-400', textClass: 'text-red-700', borderClass: 'border-red-400', cardBg: 'bg-gradient-to-br from-red-400 to-red-600', icon: '🚲' },
+            { id: 'E', name: 'Classe E', min: 0, max: 19, pop: '~15%', desc: 'Estrato de alta vulnerabilidade econômica.', bgClass: 'bg-red-600', textClass: 'text-red-800', borderClass: 'border-red-600', cardBg: 'bg-gradient-to-br from-red-600 to-red-800', icon: '⚠️' }
+        ];
+
+        let playerName = "";
+        let currentQuestion = 0;
+        let answers = new Array(questionsData.length).fill(null);
+        let tempSelectedPoints = null;
+
+        function startQuiz() {
+            const input = document.getElementById('playerName');
+            const error = document.getElementById('nameError');
+            
+            if (input.value.trim() === '') {
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                return;
+            }
+            
+            error.classList.add('hidden');
+            input.classList.remove('border-red-500');
+            
+            playerName = input.value.trim();
+            document.getElementById('playerNameDisplay').innerText = playerName;
+            
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+            document.getElementById('screen-quiz').classList.add('flex');
+            
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const qData = questionsData[index];
+            tempSelectedPoints = answers[index]; 
+
+            document.getElementById('questionCounter').innerText = `Questão ${index + 1} de ${questionsData.length}`;
+            const progress = ((index) / questionsData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress === 0 ? 3 : progress}%`;
+            
+            document.getElementById('questionText').innerText = qData.question;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            document.getElementById('selectionWarning').classList.add('hidden');
+
+            qData.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                const isSelected = tempSelectedPoints === opt.points;
+                
+                btn.className = `option-card w-full text-left px-5 py-4 rounded-xl border border-slate-600 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium focus:outline-none flex justify-between items-center shadow-sm ${isSelected ? 'option-selected' : ''}`;
+                btn.onclick = () => selectOption(opt.points, btn);
+                
+                btn.innerHTML = `
+                    <span class="flex-1 text-base md:text-lg">${opt.text} <strong class="ml-2 font-bold ${isSelected ? 'text-blue-200' : 'text-blue-400'}">(${opt.points} ${opt.points === 1 ? 'ponto' : 'pontos'})</strong></span>
+                    <div class="w-6 h-6 shrink-0 rounded-full border-2 ${isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-500'} flex items-center justify-center ml-4 transition-colors">
+                        ${isSelected ? '<div class="w-2.5 h-2.5 bg-white rounded-full"></div>' : ''}
+                    </div>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            document.getElementById('btnPrev').disabled = index === 0;
+            
+            if (index === questionsData.length - 1) {
+                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('btnFinish').classList.remove('hidden');
+            } else {
+                document.getElementById('btnNext').classList.remove('hidden');
+                document.getElementById('btnFinish').classList.add('hidden');
+            }
+            
+            updateNextButtonState();
+        }
+
+        function selectOption(points, element) {
+            tempSelectedPoints = points;
+            const buttons = document.querySelectorAll('.option-card');
+            buttons.forEach(btn => {
+                btn.classList.remove('option-selected');
+                const circle = btn.querySelector('div.rounded-full');
+                circle.classList.remove('border-blue-500', 'bg-blue-500');
+                circle.classList.add('border-slate-500');
+                circle.innerHTML = '';
+                const pointText = btn.querySelector('strong');
+                pointText.classList.remove('text-blue-200');
+                pointText.classList.add('text-blue-400');
+            });
+
+            element.classList.add('option-selected');
+            const selectedCircle = element.querySelector('div.rounded-full');
+            selectedCircle.classList.add('border-blue-500', 'bg-blue-500');
+            selectedCircle.classList.remove('border-slate-500');
+            selectedCircle.innerHTML = '<div class="w-2.5 h-2.5 bg-white rounded-full"></div>';
+            const selectedPointText = element.querySelector('strong');
+            selectedPointText.classList.remove('text-blue-400');
+            selectedPointText.classList.add('text-blue-200');
+
+            document.getElementById('selectionWarning').classList.add('hidden');
+            updateNextButtonState();
+        }
+
+        function updateNextButtonState() {
+            const hasSelection = tempSelectedPoints !== null;
+            document.getElementById('btnNext').disabled = !hasSelection;
+            document.getElementById('btnFinish').disabled = !hasSelection;
+        }
+
+        function nextQuestion() {
+            if (tempSelectedPoints === null) {
+                document.getElementById('selectionWarning').classList.remove('hidden');
+                return;
+            }
+            answers[currentQuestion] = tempSelectedPoints;
+            if (currentQuestion < questionsData.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                if (tempSelectedPoints !== null) answers[currentQuestion] = tempSelectedPoints;
+                loadQuestion(currentQuestion - 1);
+            }
+        }
+
+        function finishQuiz() {
+            if (tempSelectedPoints === null) {
+                document.getElementById('selectionWarning').classList.remove('hidden');
+                return;
+            }
+            answers[currentQuestion] = tempSelectedPoints;
+            const totalScore = answers.reduce((a, b) => a + b, 0);
+            
+            // Switch themes to Light Mode for results!
+            document.getElementById('main-body').className = 'bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center p-4 transition-colors duration-700';
+            document.getElementById('app-container').className = 'w-full max-w-4xl bg-white rounded-3xl shadow-xl p-6 md:p-10 border border-gray-200 relative transition-colors duration-700';
+            document.getElementById('bg-decoration').classList.add('opacity-0');
+            
+            document.getElementById('screen-quiz').classList.remove('flex');
+            document.getElementById('screen-quiz').classList.add('hidden');
+            
+            showResults(totalScore);
+        }
+
+        function showResults(score) {
+            document.getElementById('screen-result').classList.remove('hidden');
+            document.getElementById('screen-result').classList.add('flex');
+            document.getElementById('resultName').innerText = playerName;
+            
+            // Number counter animation
+            let currentDisplayScore = 0;
+            const scoreEl = document.getElementById('resultScore');
+            const interval = setInterval(() => {
+                if(currentDisplayScore >= score) {
+                    clearInterval(interval);
+                    scoreEl.innerText = score;
+                } else {
+                    currentDisplayScore += Math.max(1, Math.floor(score / 20));
+                    if(currentDisplayScore > score) currentDisplayScore = score;
+                    scoreEl.innerText = currentDisplayScore;
+                }
+            }, 30);
+
+            // Determine Class
+            let userClass = socialClasses[socialClasses.length - 1]; // Default E
+            for (let sc of socialClasses) {
+                if (score >= sc.min && score <= sc.max) {
+                    userClass = sc;
+                    break;
+                }
+            }
+
+            document.getElementById('resultClass').innerText = userClass.name;
+            document.getElementById('resultDesc').innerText = userClass.desc;
+            
+            // Style the big card based on class color
+            const classCard = document.getElementById('resultClassCard');
+            classCard.className = `md:col-span-3 rounded-2xl p-8 flex flex-col justify-center shadow-lg text-white transition-all duration-700 transform scale-100 relative overflow-hidden ${userClass.cardBg}`;
+
+            // Build Infographic Scale
+            const infoContainer = document.getElementById('infographicContainer');
+            infoContainer.innerHTML = '';
+
+            socialClasses.forEach(sc => {
+                const isUserClass = sc.id === userClass.id;
+                const row = document.createElement('div');
+                
+                row.className = `w-full flex flex-col sm:flex-row items-start sm:items-center p-3 rounded-xl transition-all duration-300 ${
+                    isUserClass 
+                    ? `bg-white shadow-[0_0_20px_rgba(0,0,0,0.1)] border-2 ${sc.borderClass} scale-[1.02] z-10 relative my-3` 
+                    : 'bg-gray-50 border border-transparent hover:bg-gray-100'
+                }`;
+
+                const widthPercent = Math.max(5, (sc.max / 125) * 100);
+
+                row.innerHTML = `
+                    <div class="w-24 shrink-0 font-bold text-lg ${isUserClass ? sc.textClass : 'text-gray-500'} flex items-center gap-2">
+                        <span>${sc.name}</span>
+                        ${isUserClass ? '<svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' : ''}
+                    </div>
+                    <div class="flex-grow w-full sm:mx-4 mt-2 sm:mt-0 bg-gray-200 rounded-full h-4 overflow-hidden relative">
+                        <div class="h-full rounded-full ${sc.bgClass} transition-all duration-1000 ease-out" style="width: ${widthPercent}%"></div>
+                    </div>
+                    <div class="w-full sm:w-28 text-right text-sm mt-2 sm:mt-0 ${isUserClass ? 'text-gray-900 font-bold' : 'text-gray-400'}">
+                        ${sc.min} a ${sc.max} pts
+                    </div>
+                `;
+                infoContainer.appendChild(row);
+            });
+
+            buildModalContent();
+        }
+
+        function buildModalContent() {
+            const modalList = document.getElementById('modalClassesList');
+            modalList.innerHTML = '';
+
+            socialClasses.forEach(sc => {
+                const item = document.createElement('div');
+                item.className = `flex flex-col md:flex-row gap-4 p-5 rounded-xl border ${sc.borderClass} bg-white shadow-sm`;
+                item.innerHTML = `
+                    <div class="flex-shrink-0 w-20 h-20 rounded-xl ${sc.cardBg} text-white flex flex-col items-center justify-center font-bold text-2xl shadow-inner">
+                        ${sc.id}
+                    </div>
+                    <div class="flex-grow flex flex-col justify-center">
+                        <div class="flex items-center justify-between mb-1">
+                            <h4 class="text-xl font-bold ${sc.textClass}">${sc.name}</h4>
+                            <span class="px-3 py-1 bg-gray-100 text-gray-700 font-semibold rounded-full text-sm border border-gray-200">
+                                População: ${sc.pop}
+                            </span>
+                        </div>
+                        <p class="text-gray-600 font-medium">${sc.desc}</p>
+                        <p class="text-xs text-gray-400 mt-2 font-mono bg-gray-50 inline-block px-2 py-1 rounded w-max">Pontuação: ${sc.min} até ${sc.max}</p>
+                    </div>
+                `;
+                modalList.appendChild(item);
+            });
+        }
+
+        function openModal() {
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('modal-enter');
+                content.classList.add('modal-enter-active');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('modal-enter-active');
+            content.classList.add('modal-exit-active');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                content.classList.remove('modal-exit-active');
+                content.classList.add('modal-enter');
+            }, 200);
+        }
+
+        function resetApp() {
+            playerName = "";
+            currentQuestion = 0;
+            answers = new Array(questionsData.length).fill(null);
+            tempSelectedPoints = null;
+            
+            // Revert Theme back to Dark
+            document.getElementById('main-body').className = 'bg-slate-900 text-slate-200 min-h-screen flex items-center justify-center p-4 dark-mode-scroll transition-colors duration-500';
+            document.getElementById('app-container').className = 'w-full max-w-4xl bg-slate-800 rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-700 relative overflow-hidden transition-colors duration-500';
+            document.getElementById('bg-decoration').classList.remove('opacity-0');
+
+            document.getElementById('playerName').value = '';
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('flex');
+            
+            document.getElementById('screen-start').classList.remove('hidden');
+            document.getElementById('screen-start').classList.add('flex');
+        }
+
+        document.getElementById('playerName').addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') startQuiz();
+        });
+    </script>
+</body>
+</html>
